@@ -22,29 +22,33 @@ export class SecurityService extends BaseService {
   }
 
   async login(request: LoginRequestDto): Promise<ResponseDto<LoginResultDto>> {
-    const user = await this.getUserEntityByUsername(request.username);
-    await this.validationUserPassword(user.password, request.password);
-    const accessTokenClaims = {
-      id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      username: user.username,
-    };
-    const refreshTokenClaims = {
-      id: user._id,
-    };
-    const result: LoginResultDto = {
-      accessToken: sign(accessTokenClaims, 'mopo_flo_apis', {
-        expiresIn: '24h',
-      }),
-      refreshToken: sign(refreshTokenClaims, 'mopo_flo_apis_refresh_token', {
-        expiresIn: '30d',
-      }),
-    };
+    try {
+      const user = await this.getUserEntityByUsername(request.username);
+      await this.validationUserPassword(user.password, request.password);
+      const accessTokenClaims = {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+      };
+      const refreshTokenClaims = {
+        id: user._id,
+      };
+      const result: LoginResultDto = {
+        accessToken: sign(accessTokenClaims, 'mopo_flo_apis', {
+          expiresIn: '24h',
+        }),
+        refreshToken: sign(refreshTokenClaims, 'mopo_flo_apis_refresh_token', {
+          expiresIn: '30d',
+        }),
+      };
 
-    await this.addLoginResult(user.id, result);
+      await this.addLoginResult(user.id, result);
 
-    return this.successResponse(result);
+      return this.successResponse(result);
+    } catch (error) {
+      return this.errorResponse(error.message);
+    }
   }
 
   private async getUserEntityByUsername(username: string): Promise<IUser> {

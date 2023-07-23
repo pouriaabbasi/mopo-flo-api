@@ -11,4 +11,13 @@ export class BaseService {
       code: 200,
     };
   }
+
+  protected errorResponse<T>(message: string, code?: number): ResponseDto<T> {
+    return {
+      data: null,
+      isSuccess: false,
+      code: code ?? 400,
+      message: message,
+    };
+  }
 }
